@@ -6,6 +6,7 @@
  * Version: 1.0.0
  * Author: ENGAG3 Media
  * Author URI: https://www.engag3.media
+ * GitHub Plugin URI: engag3/wp-remove-crud
  * License: GPL2
  */
 
