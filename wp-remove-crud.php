@@ -1,9 +1,9 @@
 <?php
 /**
- * Plugin Name: WP Remove extras
+ * Plugin Name: E3 Remove admin extras
  * Plugin URI: https://www.engag3.media
  * Description: Simple plugin to remove un-needed features from the WordPress admin
- * Version: 1.0.0
+ * Version: 1.0.1
  * Author: ENGAG3 Media
  * Author URI: https://www.engag3.media
  * GitHub Plugin URI: engag3/wp-remove-crud
