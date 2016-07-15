@@ -1,13 +1,14 @@
 <?php
 /*!
-  Plugin Name: E3 WooCommerce Wholesale Category
-  Plugin URI: https://github.com/engag3/wc-wholesale-products
-  Description: Products in the "Wholesale" category will only be visible to users with the "Wholesale" user role.
-  Version: 1.0.2
-  Author: ENGAG3 Media
-  Author URI: https://www.engag3.media
-  GitHub Plugin URI: https://github.com/engag3/wc-wholesale-products
-  GitHub Branch: master
+Plugin Name: E3 WooCommerce Wholesale Category
+Plugin URI: https://github.com/engag3/wc-wholesale-products
+Description: Products in the "Wholesale" category will only be visible to users with the "Wholesale" user role.
+Version: 1.0.1
+Author: ENGAG3 Media
+Author URI: https://www.engag3.media
+Tags:
+GitHub Plugin URI: https://github.com/engag3/wc-wholesale-products
+GitHub Branch: master
 
 
   Copyright 2016  ENGAG3 (email : media@engag3.us)
