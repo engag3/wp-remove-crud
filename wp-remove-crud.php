@@ -1,12 +1,12 @@
 <?php
 /*!
-  Plugin Name: E3 Remove admin extras
-  Plugin URI: https://github.com/engag3/wp-remove-crud
-  Description: Simple plugin to remove un-needed features from the WordPress admin
-  Version: 1.0.1
+  Plugin Name: E3 WooCommerce Wholesale Category
+  Plugin URI: https://github.com/engag3/wc-wholesale-products
+  Description: Products in the "Wholesale" category will only be visible to users with the "Wholesale" user role.
+  Version: 1.0.2
   Author: ENGAG3 Media
   Author URI: https://www.engag3.media
-  GitHub Plugin URI: https://github.com/engag3/wp-remove-crud
+  GitHub Plugin URI: https://github.com/engag3/wc-wholesale-products
   GitHub Branch: master
 
 
@@ -25,39 +25,62 @@
   You should have received a copy of the GNU General Public License
   along with this program; if not, write to the Free Software
   Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
- */
+*/
 
+// Woocommerce - Redirect unauthorised users from accessing a specified product category when clicked or visited via direct url
 
-// Remove custom fields metabox
- function remove_post_custom_fields() {
- 	remove_meta_box( 'postcustom' , 'post' , 'normal' );
- 	remove_meta_box( 'postcustom' , 'page' , 'normal' );
- 	remove_meta_box( 'postcustom' , 'product' , 'normal' );
- 	remove_meta_box( 'postcustom' , 'shop_order' , 'normal' );
- 	remove_meta_box( 'postcustom' , 'project' , 'normal' );
- 	remove_meta_box( 'postcustom' , 'gallery' , 'normal' );
- 	remove_meta_box( 'postcustom' , 'client' , 'normal' );
- 	remove_meta_box( 'postcustom' , 'job' , 'normal' );
+function woocommerce_hide_non_registered() {
+ if( ( is_product_category('wholesale') ) && ! ( current_user_can( 'wholesale' ) || current_user_can( 'shop_manager' ) || current_user_can( 'administrator' ) ) ) {
+ wp_redirect( site_url( '/' ));
+ exit();
  }
- add_action( 'admin_menu' , 'remove_post_custom_fields' );
+}
+add_action( 'template_redirect','woocommerce_hide_non_registered' );
+// End - Woocommerce - redirect unauthorised users from accessing a specified product category
+// Woocommerce - Removes category link from woocommerce product category widgets so they are not seen
+add_filter( 'get_terms', 'get_subcategory_terms', 10, 3 );
+function get_subcategory_terms( $terms, $taxonomies, $args ) {
+  $new_terms = array();
+  // if a product category and on the shop page
+  if ( in_array( 'product_cat', $taxonomies ) && ! ( current_user_can( 'wholesale' ) || current_user_can( 'administrator' ) ) ) {
+    foreach ( $terms as $key => $term ) {
+      if ( ! in_array( $term->slug, array( 'wholesale' ) ) ) {
+        $new_terms[] = $term;
+      }
+    }
+    $terms = $new_terms;
+  }
+  return $terms;
+}
+// End - Woocommerce - Removes category link from woocommerce product category widgets so they are not seen
+// Woocommerce - Remove products from being displayed that belong to a category user is not authorised to visit. Products seem to still be accessible via direct url unfortunately.
+add_action( 'pre_get_posts', 'custom_pre_get_posts' );
+function custom_pre_get_posts( $q ) {
+		if ( ! $q->is_main_query() ) return;
+		if ( ! $q->is_post_type_archive() ) return;
+		if ( ! ( current_user_can( 'wholesale' ) || current_user_can( 'administrator' ) ) ) {
+			   $q->set( 'tax_query', array(array(
+				   'taxonomy' => 'product_cat',
+				   'field' => 'slug',
+				   'terms' => array( 'wholesale'), // Don't display products in the private-clients category on the shop page
+				   'operator' => 'NOT IN'
+			   )));
+		}
+remove_action( 'pre_get_posts', 'custom_pre_get_posts_query' );
+}
+// End - Woocommerce - Remove products from being displayed that belong to a category user is not authorised to visit. Products seem to still be accessible via direct url unfortunately.
 
- // Remove excerpt metabox
- function remove_page_excerpt_field() {
- 	remove_meta_box( 'postexcerpt' , 'page' , 'normal' );
- 	remove_meta_box( 'postexcerpt' , 'post' , 'normal' );
- 	remove_meta_box( 'postexcerpt' , 'project' , 'normal' );
- }
- add_action( 'admin_menu' , 'remove_page_excerpt_field' );
 
+// Add class to boddy tage if wholesale user is logged in
+function my_body_classes( $classes ) {
 
-// Remove dashboard widgets
- function remove_dashboard_widgets() {
- 	global $wp_meta_boxes;
- 	unset($wp_meta_boxes['dashboard']['side']['core']['dashboard_quick_press']);
- 	unset($wp_meta_boxes['dashboard']['normal']['core']['dashboard_incoming_links']);
- 	unset($wp_meta_boxes['dashboard']['normal']['core']['dashboard_recent_drafts']);
- 	unset($wp_meta_boxes['dashboard']['normal']['core']['dashboard_recent_comments']);
- 	unset($wp_meta_boxes['dashboard']['side']['core']['dashboard_primary']);
- 	unset($wp_meta_boxes['dashboard']['side']['core']['dashboard_secondary']);
- }
- add_action('wp_dashboard_setup', 'remove_dashboard_widgets' );
+    if ( current_user_can('wholesale') || current_user_can('shop_manager') || current_user_can('administrator') ) {
+
+        $classes[] = 'is-dealer';
+
+    }
+
+    return $classes;
+
+}
+add_filter( 'body_class','my_body_classes' );
